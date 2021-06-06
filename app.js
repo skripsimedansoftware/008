@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -34,4 +36,4 @@ app.use(function(err, req, res, next) {
 	res.render('error');
 });
 
-app.listen(3000);
+app.listen(process.env.HTTP_PORT || 3000);
