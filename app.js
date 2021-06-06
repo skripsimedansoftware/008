@@ -7,6 +7,12 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const app = express();
 
+Config = require(__dirname+'/app/config');
+Models = require(__dirname+'/app/models');
+Helpers = require(__dirname+'/app/helpers');
+Libraries = require(__dirname+'/app/libraries');
+Middlewares = require(__dirname+'/app/middlewares');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
