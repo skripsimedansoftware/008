@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const session = require('express-session')
 const app = express();
 
 Config = require(__dirname+'/app/config');
@@ -18,6 +19,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
+app.use(session({
+	secret: process.env.ENCRYPTION_KEY,
+	resave: false,
+	saveUninitialized: true,
+	cookie: { secure: true }
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
