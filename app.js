@@ -57,7 +57,7 @@ app.use(session({
 	resave: false,
 	saveUninitialized: true,
 	cookie: { secure: true }
-}))
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin : (origin, callback) => { callback(null, true) }, credentials: true }));
