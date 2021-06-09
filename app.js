@@ -10,6 +10,11 @@ const logger = require('morgan');
 const session = require('express-session')
 const app = express();
 
+global.CONSTANTS = {
+	BASE_PATH: __dirname,
+	PUBLIC_PATH: __dirname+'/public/'
+}
+
 Config = require(__dirname+'/app/config');
 Models = require(__dirname+'/app/models');
 Helpers = require(__dirname+'/app/helpers');
@@ -22,7 +27,8 @@ async.waterfall([
 	 * Initialize database
 	 */
 	async function initializeDatabase(callback) {
-		var ACTIVE_DATABASE = Config.database[process.env.ACTIVE_DATABASE];
+		var DATABASE = require(__dirname+'/database.json');
+		var ACTIVE_DATABASE = DATABASE[process.env.ACTIVE_DATABASE];
 		if (ACTIVE_DATABASE.dbdriver.toLowerCase().match(/(mongo|mongodb)/)) {
 			const MongoDB = require('mongodb').MongoClient;
 			const DBConfig = new MongoDB('mongodb://'+ACTIVE_DATABASE.host+':'+ACTIVE_DATABASE.port, { useUnifiedTopology: true });
@@ -62,7 +68,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin : (origin, callback) => { callback(null, true) }, credentials: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(CONSTANTS.PUBLIC_PATH));
 
 app.use('/', require(__dirname+'/routes/index'));
 app.use('/users', require(__dirname+'/routes/users'));
