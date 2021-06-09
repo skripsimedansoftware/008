@@ -1,0 +1,15 @@
+{
+	"default": {
+		"dsn": "",
+		"host": "localhost",
+		"port": 27017,
+		"username": "admin",
+		"password": "",
+		"database": "express_starter",
+		"dbprefix": "",
+		"db_debug": false,
+		"dbdriver": "mongo",
+		"char_set": "utf8",
+		"dbcollat": "utf8_general_ci"
+	}
+}
