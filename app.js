@@ -15,38 +15,39 @@ global.CONSTANTS = {
 	PUBLIC_PATH: __dirname+'/public/'
 }
 
-Config = require(__dirname+'/app/config');
-Models = require(__dirname+'/app/models');
-Helpers = require(__dirname+'/app/helpers');
-Libraries = require(__dirname+'/app/libraries');
-Middlewares = require(__dirname+'/app/middlewares');
-DB = {};
+global.DB = {}
+global.Config = require(__dirname+'/app/config');
+global.Models = require(__dirname+'/app/models');
+global.Helpers = require(__dirname+'/app/helpers');
+global.Libraries = require(__dirname+'/app/libraries');
+global.Middlewares = require(__dirname+'/app/middlewares');
 
-async.waterfall([
-	/**
-	 * Initialize database
-	 */
-	async function initializeDatabase(callback) {
+function initDB() {
+	return new Promise((resolve, reject) => {
 		var DATABASE = require(__dirname+'/database.json');
 		var ACTIVE_DATABASE = DATABASE[process.env.ACTIVE_DATABASE];
 		if (ACTIVE_DATABASE.dbdriver.toLowerCase().match(/(mongo|mongodb)/)) {
 			const MongoDB = require('mongodb').MongoClient;
-			const DBConfig = new MongoDB('mongodb://'+ACTIVE_DATABASE.host+':'+ACTIVE_DATABASE.port, { useUnifiedTopology: true });
-			app.set('database', {
-				database: ACTIVE_DATABASE.database,
-				connection: await DBConfig.connect()
-			});
+			if (ACTIVE_DATABASE.dsn !== '') {
+				const DBConfig = new MongoDB(ACTIVE_DATABASE.dsn, { useUnifiedTopology: true });
+				DBConfig.connect().then(connection => resolve({active_database: ACTIVE_DATABASE, connection: connection}), error => reject(error));
+			} else {
+				const DBConfig = new MongoDB('mongodb://'+ACTIVE_DATABASE.host+':'+ACTIVE_DATABASE.port, { useUnifiedTopology: true });
+				DBConfig.connect().then(connection => resolve({active_database: ACTIVE_DATABASE, connection: connection}), error => reject(error));
+			}
 		}
-	},
+	});
+}
 
-	/**
-	 * Activate database
-	 */
-	function activateDatabase(error, callback) {
-		Object.assign(DB, app.get('database').connection.db(app.get('database').database));
-		callback(null, callback);
-	}
-], (error) => {
+async.waterfall([
+	function (callback) {
+		initDB().then(connection => callback(null, connection), error => callback(error)); // Initialize database config
+	},
+	function(params, callback) {
+		let activate_database = params.connection.db(params.active_database.database); // Activation current database
+		callback(null, {database: activate_database});
+	},
+], function (error, result) {
 	if (error) {
 		console.log(error);
 		process.exit(0);
