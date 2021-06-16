@@ -15,9 +15,7 @@ global.CONSTANTS = {
 	PUBLIC_PATH: __dirname+'/public/'
 }
 
-global.DB = {}
 global.Config = require(__dirname+'/app/config');
-global.Models = require(__dirname+'/app/models');
 global.Helpers = require(__dirname+'/app/helpers');
 global.Libraries = require(__dirname+'/app/libraries');
 global.Middlewares = require(__dirname+'/app/middlewares');
@@ -44,13 +42,15 @@ async.waterfall([
 		initDB().then(connection => callback(null, connection), error => callback(error)); // Initialize database config
 	},
 	function(params, callback) {
-		let activate_database = params.connection.db(params.active_database.database); // Activation current database
-		callback(null, {database: activate_database});
+		callback(null, {database: params.connection.db(params.active_database.database)}); // Activation current database
 	},
 ], function (error, result) {
 	if (error) {
 		console.log(error);
 		process.exit(0);
+	} else {
+		global.DB = result.database;
+		global.Models = require(__dirname+'/app/models');
 	}
 });
 
