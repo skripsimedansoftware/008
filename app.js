@@ -39,18 +39,32 @@ function initDB() {
 
 async.waterfall([
 	function (callback) {
-		initDB().then(connection => callback(null, connection), error => callback(error)); // Initialize database config
+		if (process.env.ENABLE_DATABASE == 'YES') {
+			initDB().then(connection => callback(null, connection), error => callback(error)); // Initialize database config
+		} else {
+			callback(null);
+		}
 	},
 	function(params, callback) {
-		callback(null, {database: params.connection.db(params.active_database.database)}); // Activation current database
+		if (process.env.ENABLE_DATABASE == 'YES') {
+			callback(null, {database: params.connection.db(params.active_database.database)}); // Activation current database
+		} else {
+			if (typeof callback == 'function') {
+				callback(null);
+			} else {
+				params(null);
+			}
+		}
 	},
 ], function (error, result) {
 	if (error) {
 		console.log(error);
 		process.exit(0);
 	} else {
-		global.DB = result.database;
-		global.Models = require(__dirname+'/app/models');
+		if (process.env.ENABLE_DATABASE == 'YES') {
+			global.DB = result.database;
+			global.Models = require(__dirname+'/app/models');
+		}
 	}
 });
 
