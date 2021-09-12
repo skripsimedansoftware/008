@@ -7,7 +7,7 @@ const cors = require('cors');
 const async = require('async');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const session = require('express-session')
+const session = require('express-session');
 const app = express();
 
 global.CONSTANTS = {
