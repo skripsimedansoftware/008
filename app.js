@@ -87,7 +87,7 @@ async.waterfall([
 			});
 
 			(async () => {
-				await DB.sync({ force: process.env.INITIALIZE_DB });
+				await DB.sync({ force: Helpers.string.to_boolean(process.env.INITIALIZE_DB) });
 			})();
 
 			if (process.env.INITIALIZE_DB) {
