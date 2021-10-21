@@ -1,0 +1,14 @@
+module.exports = {
+	email: {
+		type: Libraries.sequelize.DataTypes.STRING(80)
+	},
+	username: {
+		type: Libraries.sequelize.DataTypes.STRING(16)
+	},
+	password: {
+		type: Libraries.sequelize.DataTypes.STRING(40)
+	},
+	full_name: {
+		type: Libraries.sequelize.DataTypes.STRING(60)
+	}
+}
