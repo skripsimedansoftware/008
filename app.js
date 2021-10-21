@@ -79,11 +79,11 @@ async.waterfall([
 			global.Models = require(__dirname+'/app/models');
 
 			Object.keys(Models).forEach((model) => {
-				DB.define(model, Models[model], {
+				DB.define(model, Models[model].fields, Object.assign({
 					freezeTableName: true,
 					createdAt: 'created_at',
 					updatedAt: 'updated_at'
-				});
+				}, Models[model].config));
 			});
 
 			(async () => {
