@@ -38,7 +38,8 @@ function initDB() {
 			const Sequelize = Libraries.sequelize;
 			const sequelize = new Sequelize.Sequelize(ACTIVE_DATABASE.database, ACTIVE_DATABASE.username, ACTIVE_DATABASE.password, {
 				host: ACTIVE_DATABASE.host,
-				dialect: ACTIVE_DATABASE.dbdriver
+				dialect: ACTIVE_DATABASE.dbdriver,
+				logging: process.env.APP_ENV == 'development'
 			});
 
 			resolve({driver: 'sequelize', active_database: ACTIVE_DATABASE, connection: sequelize});
