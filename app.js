@@ -29,10 +29,10 @@ function initDB() {
 			const MongoDB = require('mongodb').MongoClient;
 			if (ACTIVE_DATABASE.dsn !== '') {
 				const DBConfig = new MongoDB(ACTIVE_DATABASE.dsn, { useUnifiedTopology: true });
-				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: ACTIVE_DATABASE, connection: connection}), error => reject(error));
+				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: ACTIVE_DATABASE, connection: connection, db_config: DATABASE}), error => reject(error));
 			} else {
 				const DBConfig = new MongoDB('mongodb://'+ACTIVE_DATABASE.host+':'+ACTIVE_DATABASE.port, { useUnifiedTopology: true });
-				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: ACTIVE_DATABASE, connection: connection}), error => reject(error));
+				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: ACTIVE_DATABASE, connection: connection, db_config: DATABASE}), error => reject(error));
 			}
 		} else if (ACTIVE_DATABASE.dbdriver.toLowerCase().match(/(mysqli?)/)) {
 			const Sequelize = Libraries.sequelize;
@@ -42,7 +42,7 @@ function initDB() {
 				logging: process.env.APP_ENV == 'development'
 			});
 
-			resolve({driver: 'sequelize', active_database: ACTIVE_DATABASE, connection: sequelize});
+			resolve({driver: 'sequelize', active_database: ACTIVE_DATABASE, connection: sequelize, db_config: DATABASE});
 		}
 	});
 }
@@ -50,7 +50,7 @@ function initDB() {
 async.waterfall([
 	function (callback) {
 		if (process.env.ENABLE_DATABASE == 'YES') {
-			initDB().then(connection => callback(null, connection), error => callback(error)); // Initialize database config
+			initDB().then(initialize_database => callback(null, initialize_database), error => callback(error)); // Initialize database config
 		} else {
 			callback(null);
 		}
@@ -58,9 +58,9 @@ async.waterfall([
 	function(params, callback) {
 		if (process.env.ENABLE_DATABASE == 'YES') {
 			if (params.active_database.driver == 'mongodb') {
-				callback(null, {database: params.connection.db(params.active_database.database)}); // Activation current database
+				callback(null, {driver: params.driver, active_database: params.active_database, database: params.connection.db(params.active_database.database), db_config: params.db_config}); // Activation current database
 			} else {
-				callback(null, {database: params.connection}); // Activation current database
+				callback(null, {driver: params.driver, active_database: params.active_database, database: params.connection, db_config: params.db_config}); // Activation current database
 			}
 		} else {
 			if (typeof callback == 'function') {
@@ -77,19 +77,24 @@ async.waterfall([
 	} else {
 		if (process.env.ENABLE_DATABASE == 'YES') {
 			global.DB = result.database;
+			global.DB_CONFIG = result.db_config;
 			global.Models = require(__dirname+'/app/models');
 
-			Object.keys(Models).forEach((model) => {
-				DB.define(model, Models[model].fields, Object.assign({
-					freezeTableName: true,
-					createdAt: 'created_at',
-					updatedAt: 'updated_at'
-				}, Models[model].config));
-			});
+			if (result.driver == 'mongodb') {
+			} else if (result.driver == 'rethinkdb') {
+			} else if (result.driver == 'sequelize') {
+				Object.keys(Models).forEach((model) => {
+					DB.define(model, Models[model].fields, Object.assign({
+						freezeTableName: true,
+						createdAt: 'created_at',
+						updatedAt: 'updated_at'
+					}, Models[model].config));
+				});
 
-			(async () => {
-				await DB.sync({ force: Helpers.string.to_boolean(process.env.INITIALIZE_DB) });
-			})();
+				(async () => {
+					await DB.sync({ force: Helpers.string.to_boolean(process.env.INITIALIZE_DB) });
+				})();
+			}
 
 			if (process.env.INITIALIZE_DB) {
 				var file_content = fs.readFileSync(CONSTANTS.BASE_PATH+'/.env', 'utf8');
