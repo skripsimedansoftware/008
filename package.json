@@ -3,7 +3,12 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"start": "node app.js"
+		"start": "node app.js",
+		"with-mongodb": "npm install mongodb",
+		"with-rethinkdb": "npm install rethinkdb",
+		"sequelize-mysql": "npm install sequelize mysql2 mariadb",
+		"sequelize-sqlite": "npm install sequelize sqlite3",
+		"sequelize-postgre": "npm install sequelize postgresql"
 	},
 	"dependencies": {
 		"async": "^3.2.0",
@@ -16,11 +21,6 @@
 		"express-session": "^1.17.2",
 		"hbs": "^4.1.2",
 		"http-errors": "~1.6.3",
-		"mariadb": "^2.5.5",
-		"mongodb": "^3.6.9",
-		"morgan": "~1.9.1",
-		"mysql2": "^2.3.2",
-		"sequelize": "^6.7.0",
-		"sqlite3": "^5.0.2"
+		"morgan": "~1.9.1"
 	}
 }
