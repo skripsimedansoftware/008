@@ -11,6 +11,7 @@ const session = require('express-session');
 const app = express();
 const fs = require('fs');
 
+global.r;
 global.CONSTANTS = {
 	BASE_PATH: __dirname,
 	PUBLIC_PATH: __dirname+'/public/'
@@ -34,6 +35,22 @@ function initDB() {
 				const DBConfig = new MongoDB('mongodb://'+ACTIVE_DATABASE.host+':'+ACTIVE_DATABASE.port, { useUnifiedTopology: true });
 				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: ACTIVE_DATABASE, connection: connection, db_config: DATABASE}), error => reject(error));
 			}
+		} else if (ACTIVE_DATABASE.dbdriver.toLowerCase().match(/(rethinkdb)/)) {
+			// Do Here
+			r = require('rethinkdb');
+			r.connect({
+				host: ACTIVE_DATABASE.host,
+				port: ACTIVE_DATABASE.port,
+				user: ACTIVE_DATABASE.username,
+				password: ACTIVE_DATABASE.password,
+				db: ACTIVE_DATABASE.password
+			}, (error, connection) => {
+				if (error) {
+					reject(error);
+				}
+
+				resolve({driver: 'rethinkdb', active_database: ACTIVE_DATABASE, connection: connection, db_config: DATABASE});
+			});
 		} else if (ACTIVE_DATABASE.dbdriver.toLowerCase().match(/(mysqli?)/)) {
 			const Sequelize = Libraries.sequelize;
 			const sequelize = new Sequelize.Sequelize(ACTIVE_DATABASE.database, ACTIVE_DATABASE.username, ACTIVE_DATABASE.password, {
@@ -76,8 +93,8 @@ async.waterfall([
 		process.exit(0);
 	} else {
 		if (process.env.ENABLE_DATABASE == 'YES') {
-			global.DB = result.database;
-			global.DB_CONFIG = result.db_config;
+			global.DB = result.database; // define active database connection as global variable
+			global.DB_CONFIG = result.db_config; // define database config as global variable
 			global.Models = require(__dirname+'/app/models');
 
 			if (result.driver == 'mongodb') {
