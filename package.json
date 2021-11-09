@@ -8,7 +8,7 @@
 		"with-rethinkdb": "npm install rethinkdb",
 		"sequelize-mysql": "npm install sequelize mysql2 mariadb",
 		"sequelize-sqlite": "npm install sequelize sqlite3",
-		"sequelize-postgre": "npm install sequelize postgresql"
+		"sequelize-postgre": "npm install sequelize pg pg-hstore"
 	},
 	"dependencies": {
 		"async": "^3.2.0",
