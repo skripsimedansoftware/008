@@ -1,4 +1,5 @@
 module.exports = {
+	connections: [process.env.ACTIVE_DATABASE],
 	fields: {
 		id: {
 			type: Libraries.sequelize.DataTypes.BIGINT.UNSIGNED,
