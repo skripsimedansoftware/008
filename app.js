@@ -18,6 +18,7 @@ global.CONSTANTS = {
 	DB_CONFIG: require(__dirname+'/database.json')
 }
 global.DB;
+global.Models;
 global.Config = require(__dirname+'/app/config');
 global.Helpers = require(__dirname+'/app/helpers');
 global.Libraries = require(__dirname+'/app/libraries');
@@ -54,27 +55,6 @@ async.waterfall([
 	} else {
 		if (process.env.ENABLE_DATABASE == 'YES') {
 			DB = result.database; // define active database connection as global variable
-			global.Models = require(__dirname+'/app/models');
-
-			if (result.driver == 'mongodb') {
-			} else if (result.driver == 'rethinkdb') {
-			} else if (result.driver == 'sequelize') {
-				Object.keys(Models).forEach((model) => {
-					if (Models[model].connections !== undefined && Models[model].connections.indexOf(process.env.ACTIVE_DATABASE) !== -1)
-					{
-						var dbprefix = (result.active_database.dbprefix !== undefined && result.active_database.dbprefix !== '')?result.active_database.dbprefix:'';
-						DB.connection.define(dbprefix+model, Models[model].fields, Object.assign({
-							freezeTableName: true,
-							createdAt: 'created_at',
-							updatedAt: 'updated_at'
-						}, Models[model].config));
-					}
-				});
-
-				(async () => {
-					await DB.connection.sync({ force: Helpers.string.to_boolean(process.env.INITIALIZE_DB) });
-				})();
-			}
 
 			if (process.env.INITIALIZE_DB) {
 				var file_content = fs.readFileSync(CONSTANTS.BASE_PATH+'/.env', 'utf8');
