@@ -60,7 +60,7 @@ class Database {
 			host: host,
 			port: (port !== 3306)?port:3306,
 			dialect: dbdriver,
-			logging: false
+			logging: this.active_database.db_debug
 		});
 
 		resolve({ driver: 'sequelize', active_database: this.active_database, connection: { connection, Sequelize, Op, Model, DataTypes } });
