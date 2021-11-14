@@ -131,29 +131,41 @@ npm run sequelize-postgre
 }
 ```
 
+### Initialize other database with database group name
+
+```javascript
+var database2 = new Libraries.database('other_database_group');
+database2.init().then(({ driver, active_database, connection }) => {
+	console.log('connected using ', driver);
+	console.log('connected database ', active_database);
+	console.log('DB connection ', connection);
+}).catch(console.log); // Initialize database config
+```
+
 ### Database Models
 
-**example model for sequelize driver**
+**example model for sequelize**
 
 ```javascript
 module.exports = {
+	connections: [process.env.ACTIVE_DATABASE, 'database_backup', ...],
 	fields: {
 		id: {
-			type: Libraries.sequelize.DataTypes.BIGINT.UNSIGNED,
+			type: DB.DataTypes.BIGINT.UNSIGNED,
 			primaryKey: true,
 			autoIncrement: true
 		},
 		email: {
-			type: Libraries.sequelize.DataTypes.STRING(80)
+			type: DB.DataTypes.STRING(80)
 		},
 		username: {
-			type: Libraries.sequelize.DataTypes.STRING(16)
+			type: DB.DataTypes.STRING(16)
 		},
 		password: {
-			type: Libraries.sequelize.DataTypes.STRING(40)
+			type: DB.DataTypes.STRING(40)
 		},
 		full_name: {
-			type: Libraries.sequelize.DataTypes.STRING(60)
+			type: DB.DataTypes.STRING(60)
 		}
 	},
 	config: {}
