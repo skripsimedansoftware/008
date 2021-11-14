@@ -63,7 +63,7 @@ npm run sequelize-mysql
 npm run sequelize-sqlite
 ```
 
-**Post**
+**PostgreSQL**
 
 ```bash
 npm run sequelize-postgre
@@ -168,6 +168,40 @@ module.exports = {
 			type: DB.DataTypes.STRING(60)
 		}
 	},
-	config: {}
+	config: {
+		tableName: 'user_table'
+	}
 }
+```
+
+```javascript
+Models.user.create({
+	email: 'medansoftware.com@gmail.com',
+	username: 'medansoftware',
+	password: 'medansoftware',
+	full_name: 'Medan Software'
+}).then(created => {
+	res.json(created)
+}, ({ name, original }) => {
+	res.json({ error: {
+		code: original.code,
+		message: original.sqlMessage
+	}})
+});
+```
+
+```javascript
+Models.user.create({
+	email: 'medansoftware.com@gmail.com',
+	username: 'medansoftware-this-car-more-than-column-length',
+	password: 'medansoftware',
+	full_name: 'Medan Software'
+}).then(created => {
+	res.json(created)
+}, ({ name, original }) => {
+	res.json({ error: {
+		code: original.code,
+		message: original.sqlMessage
+	}})
+});
 ```
