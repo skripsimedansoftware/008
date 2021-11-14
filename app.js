@@ -17,62 +17,17 @@ global.CONSTANTS = {
 	PUBLIC_PATH: __dirname+'/public/',
 	DB_CONFIG: require(__dirname+'/database.json')
 }
-
+global.DB;
 global.Config = require(__dirname+'/app/config');
 global.Helpers = require(__dirname+'/app/helpers');
 global.Libraries = require(__dirname+'/app/libraries');
 global.Middlewares = require(__dirname+'/app/middlewares');
 
-function initDB() {
-	return new Promise(async (resolve, reject) => {
-		var active_database = CONSTANTS.DB_CONFIG[process.env.ACTIVE_DATABASE];
-		if (active_database.dbdriver.toLowerCase().match(/(mongo|mongodb)/)) {
-			const MongoDB = require('mongodb').MongoClient;
-			if (active_database.dsn !== '') {
-				const DBConfig = new MongoDB(active_database.dsn, { useUnifiedTopology: true });
-				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: active_database, connection: connection})).catch(reject);
-			} else {
-				const DBConfig = new MongoDB('mongodb://'+active_database.host+':'+active_database.port, { useUnifiedTopology: true });
-				DBConfig.connect().then(connection => resolve({driver: 'mongodb', active_database: active_database, connection: connection})).catch(reject);
-			}
-		} else if (active_database.dbdriver.toLowerCase().match(/(rethinkdb)/)) {
-			r = require('rethinkdb');
-			r.connect({
-				host: active_database.host,
-				port: active_database.port,
-				user: active_database.username,
-				password: active_database.password,
-				db: active_database.password
-			}, (error, connection) => {
-				if (error) {
-					reject(error);
-				}
-
-				resolve({driver: 'rethinkdb', active_database: active_database, connection: connection});
-			});
-		} else if (active_database.dbdriver.toLowerCase().match(/(mysqli?)/)) {
-			const mysql = require('mysql2/promise');
-			const { host, port, username, password, database, dbdriver } = active_database;
-			const temp_connection = await mysql.createConnection({ host, port, user:username, password });
-			await temp_connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
-
-			const Sequelize = Libraries.sequelize;
-			const sequelize = new Sequelize.Sequelize(database, username, password, {
-				host: host,
-				port: (port !== 3306)?port:3306,
-				dialect: dbdriver,
-				logging: (process.env.APP_ENV == 'development')
-			});
-
-			resolve({ driver: 'sequelize', active_database: active_database, connection: sequelize });
-		}
-	});
-}
-
 async.waterfall([
 	function (callback) {
 		if (process.env.ENABLE_DATABASE == 'YES') {
-			initDB().then(initialize_database => callback(null, initialize_database), error => callback(error)); // Initialize database config
+			var database = new Libraries.database;
+			database.init().then(initialize_database => callback(null, initialize_database), error => callback(error)); // Initialize database config
 		} else {
 			callback(null);
 		}
@@ -98,7 +53,7 @@ async.waterfall([
 		process.exit(0);
 	} else {
 		if (process.env.ENABLE_DATABASE == 'YES') {
-			global.DB = result.database; // define active database connection as global variable
+			DB = result.database; // define active database connection as global variable
 			global.Models = require(__dirname+'/app/models');
 
 			if (result.driver == 'mongodb') {
@@ -108,14 +63,16 @@ async.waterfall([
 					if (Models[model].connections !== undefined && Models[model].connections.indexOf(process.env.ACTIVE_DATABASE) !== -1)
 					{
 						var dbprefix = (result.active_database.dbprefix !== undefined && result.active_database.dbprefix !== '')?result.active_database.dbprefix:'';
-						DB.define(dbprefix+model, Models[model].fields, Object.assign({
+						DB.connection.define(dbprefix+model, Models[model].fields, Object.assign({
 							freezeTableName: true,
 							createdAt: 'created_at',
 							updatedAt: 'updated_at'
 						}, Models[model].config));
 					}
-				});				(async () => {
-					await DB.sync({ force: Helpers.string.to_boolean(process.env.INITIALIZE_DB) });
+				});
+
+				(async () => {
+					await DB.connection.sync({ force: Helpers.string.to_boolean(process.env.INITIALIZE_DB) });
 				})();
 			}
 
