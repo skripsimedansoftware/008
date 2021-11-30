@@ -8,7 +8,7 @@ class Shopee {
 	}
 
 	getItemByCategory(id) {
-		var items = new Array();shopee
+		var items = new Array();
 		return new Promise((resolve, reject) => {
 			this.api.get('/flash_sale/get_all_itemids', {
 				need_personalize: true,
@@ -30,7 +30,7 @@ class Shopee {
 		});
 	}
 
-	getProductItems(category, limit = 12, itemids) {
+	getProductItemsByCategory(category, limit = 12, itemids) {
 		if (itemids == undefined) {
 			itemids = '[]';
 		} else if (typeof itemids == 'array') {
