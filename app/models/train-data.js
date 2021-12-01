@@ -10,20 +10,23 @@ module.exports = function(DataTypes) {
 			item_id: {
 				type: DataTypes.BIGINT.UNSIGNED
 			},
+			real_price: {
+				type: DataTypes.DOUBLE
+			},
 			discount: {
 				type: DataTypes.DOUBLE
 			},
-			price: {
+			price_with_discount: {
 				type: DataTypes.DOUBLE
 			},
 			date_day: {
-				type: DataTypes.INTEGER(2)
+				type: DataTypes.STRING(2)
 			},
 			date_month: {
-				type: DataTypes.INTEGER(2)
+				type: DataTypes.STRING(2)
 			},
 			time_hour: {
-				type: DataTypes.INTEGER(2)
+				type: DataTypes.STRING(2)
 			}
 		},
 		config: {}

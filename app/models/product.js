@@ -13,6 +13,9 @@ module.exports = function(DataTypes) {
 			item_id: {
 				type: DataTypes.BIGINT.UNSIGNED
 			},
+			shop_id: {
+				type: DataTypes.BIGINT.UNSIGNED
+			},
 			name: {
 				type: DataTypes.STRING(100)
 			},
