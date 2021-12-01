@@ -9,7 +9,9 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const app = express();
+const http = require('http').Server(app);
 const fs = require('fs');
+const io = require('socket.io')(http);
 
 global.r;
 global.CONSTANTS = {
@@ -66,6 +68,16 @@ async.waterfall([
 	}
 });
 
+io.on('connection', (socket) => {
+	socket.on('make_train_data', () => {
+
+	});
+
+	socket.on('make_test_data', () => {
+
+	});
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -102,4 +114,4 @@ app.use(function(err, req, res, next) {
 	res.render('error');
 });
 
-app.listen(process.env.HTTP_PORT || 3000);
+http.listen(process.env.HTTP_PORT || 3000);
