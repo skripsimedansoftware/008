@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const app = express();
+const hbs = require('hbs');
 const http = require('http').Server(app);
 const fs = require('fs');
 const io = require('socket.io')(http);
@@ -68,14 +69,64 @@ async.waterfall([
 	}
 });
 
-io.on('connection', (socket) => {
-	socket.on('make_train_data', () => {
+/**
+ *
+ * Data Manipulator
+ *
+ *
+var moment = require('moment');
+var date = moment().month(9).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
 
+for (i = 0; i < 1500; i ++) {
+	date.add(1, 'hour');
+	var match_hours = ['00', '12', '13', '20'];
+
+	var matches_time = (date.format('MM') == date.format('DD'));
+	var matches_hour = (match_hours.indexOf(date.format('HH')) !== -1);
+
+	// debug : console.log(date.format('YYYY-MM-DD HH'));
+
+	products.forEach((item, index) => {
+		if (matches_time) {
+
+		} else {
+			if (matches_hour) {
+
+			}
+		}
+	});
+}
+*/
+
+io.on('connection', (socket) => {
+	socket.on('make_train_data', async () => {
+		var all_product = await Models.product.findAll();
+		// start from 1 october 2021		
+		for (i = 0; i < 1000; i ++) {
+			date.add(i, 'hour');
+			console.log(date.format('YYYY-MM-DD'));
+			console.log(date.format('H'));
+		}
 	});
 
 	socket.on('make_test_data', () => {
 
 	});
+});
+
+
+hbs.registerHelper('times', function(n, block) {
+	var accum = '';
+	for (var i = 0; i < n; ++i)
+		accum += block.fn(i);
+	return accum;
+});
+
+hbs.registerHelper('for', function(from, to, incr, block) {
+	var accum = '';
+	for (var i = from; i < to; i += incr)
+	accum += block.fn(i);
+	return accum;
 });
 
 // view engine setup

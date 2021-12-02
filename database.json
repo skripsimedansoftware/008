@@ -5,7 +5,7 @@
 		"port": 3306,
 		"username": "root",
 		"password": "",
-		"database": "express-starter",
+		"database": "backpropagation-shopee",
 		"dbprefix": "",
 		"db_debug": false,
 		"dbdriver": "mysql",
