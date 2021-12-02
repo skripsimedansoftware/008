@@ -3,28 +3,27 @@ const axios = require('axios');
 class Shopee {
 	constructor() {
 		this.api = axios.create({
-			baseURL: 'https://shopee.co.id/api/v2'
+			baseURL: 'https://shopee.co.id/api'
 		});
 	}
 
 	getItemByCategory(id) {
-		var items = new Array();
 		return new Promise((resolve, reject) => {
-			this.api.get('/flash_sale/get_all_itemids', {
-				need_personalize: true,
-				sort_soldout: true
-			}).then(response => {
+			this.api.get('/v2/flash_sale/get_all_itemids', {params: { need_personalize: true, sort_soldout: true }}
+			).then(response => {
 				if (response.data !== undefined && response.data.data !== undefined) {
-					response.data.data.item_brief_list.forEach((item, index) => {
-						id = (id == null | id == undefined)?13:id;
-						if (item.catid == 13) {
-							items.push(item.itemid);
+					var items = response.data.data.item_brief_list.map((item, index) => {
+						if (item.catid == id && item.recommendation_info !== null) {
+							var info = JSON.parse(item.recommendation_info);
+							if (parseFloat(info.score.toFixed(2)) < 0.1) {
+								return item.itemid;
+							}
 						}
 
-						if ((index+1) === response.data.data.item_brief_list.length) {
-							resolve(items);
-						}
+						return false;
 					});
+
+					resolve(items.filter(Number));
 				}
 			}, reject);
 		});
@@ -38,7 +37,7 @@ class Shopee {
 		}
 
 		return new Promise((resolve, reject) => {
-			this.api.post('/flash_sale/flash_sale_batch_get_items', {
+			this.api.post('/v2/flash_sale/flash_sale_batch_get_items', {
 				categoryid: category,
 				limit: limit,
 				itemids: itemids,
@@ -46,6 +45,17 @@ class Shopee {
 				need_personalize: true,
 				with_dp_items: true
 			}).then(response => { resolve(response.data.data.items) }, reject);
+		});
+	}
+
+	getProductItem(item, shop) {
+		return new Promise((resolve, reject) => {
+			this.api.get('/v4/item/get', {
+				params: {
+					itemid: item,
+					shopid: shop
+				}
+			}).then(response => { resolve(response.data.data) }, reject);
 		});
 	}
 }
