@@ -82,9 +82,9 @@ router.get('/', async function(req, res) {
 	neural_network.learn(train_data);
 	var result = neural_network.predict([ product.discount, product.price_with_discount, moment().format('DD'), moment().format('MM')]);
 	// var info = await shopee.getProductItem(product.item_id, product.shop_id);
-	res.render('prediction', { title: Config.app.name, product: product, neural_network: neural_network, prediction: result});
+	res.render('prediction', { title: Config.app.name, product: product, neural_network: neural_network, prediction: result, query: req.query });
 }).get('/search', async function(req, res) {
-	res.render('index', { title: Config.app.name, products: await Models.product.findAll({
+	res.render('search', { title: Config.app.name, products: await Models.product.findAll({
 		where: {
 			name: {
 				[DB.Op.substring]: '%'+req.query.search+'%'
