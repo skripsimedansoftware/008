@@ -100,13 +100,63 @@ for (i = 0; i < 1500; i ++) {
 
 io.on('connection', (socket) => {
 	socket.on('make_train_data', async () => {
-		var all_product = await Models.product.findAll();
-		// start from 1 october 2021		
-		for (i = 0; i < 1000; i ++) {
-			date.add(i, 'hour');
-			console.log(date.format('YYYY-MM-DD'));
-			console.log(date.format('H'));
-		}
+		var moment = require('moment');
+		var date = moment().month(9).date(1).hours(0).minutes(0).seconds(0).milliseconds(0);
+		Models.product.findAll().then(products => {
+			for (i = 0; i < 1500; i ++) {
+				date.add(1, 'hour');
+				var match_hours = ['00', '12', '13', '20'];
+				var matches_time = (date.format('MM') == date.format('DD'));
+				var matches_hour = (match_hours.indexOf(date.format('HH')) !== -1);
+
+				// debug : console.log(date.format('YYYY-MM-DD HH'));
+
+				products.forEach(async (item, index) => {
+					var real_price = item.real_price;
+					var discount = 0;
+					var price_with_discount = real_price;
+					if (matches_time) {
+						var matches_for = Helpers.array.random(['time', 'hour']);
+						if (matches_for == 'time') {
+							discount = Helpers.number.random_integer(60, 99);
+						} else {
+							discount = Helpers.number.random_integer(2, 80);
+						}
+
+						var data = {
+							item_id: item.item_id,
+							real_price: item.real_price,
+							discount: discount,
+							price_with_discount: (item.real_price-(discount/100)*item.real_price),
+							date_day: date.format('DD'),
+							date_month: date.format('MM'),
+							time_hour: date.format('HH')
+						};
+
+						// console.log('matches-time', data);
+						Models['sample-data'].create(data);
+					} else {
+						if (matches_hour) {
+							discount = Helpers.number.random_integer(2, 60);
+							var data = {
+								item_id: item.item_id,
+								real_price: item.real_price,
+								discount: discount,
+								price_with_discount: (item.real_price-(discount/100)*item.real_price),
+								date_day: date.format('DD'),
+								date_month: date.format('MM'),
+								time_hour: date.format('HH')
+							};
+
+							// console.log('matches-hour', data);
+							Models['sample-data'].create(data);
+						}
+					}
+				});
+			}
+
+			socket.emit('make_train_data');
+		});
 	});
 
 	socket.on('make_test_data', () => {

@@ -5,6 +5,46 @@
 				<td>Nama Produk</td>
 				<td>{{ product.name }}</td>
 			</tr>
+			<tr>
+				<td>Harga Asli</td>
+				<td>{{ product.real_price }}</td>
+			</tr>
+			<tr>
+				<td>Diskon</td>
+				<td>{{ product.discount }}%</td>
+			</tr>
+			<tr>
+				<td>Harga</td>
+				<td>{{ product.price_with_discount }}</td>
+			</tr>
+			<tr>
+				<td>Prediksi</td>
+				<td>{{ prediction }}</td>
+			</tr>
+		</table>
+
+		<table class="table table-hover table-striped table-bordered">
+			<tr>
+				<td>Jumlah Input</td>
+				<td>{{ neural_network.inputLayer.layerSize }}</td>
+			</tr>
+			<tr>
+				<td>Jumlah Output</td>
+				<td>{{ neural_network.outputLayer.layerSize }}</td>
+			</tr>
+			
+			<tr>
+				<td>Learning Rate</td>
+				<td>{{ neural_network.learningRate }}</td>
+			</tr>
+			<tr>
+				<td>Iterasi</td>
+				<td>{{ neural_network.iterations }}</td>
+			</tr>
+			<tr>
+				<td>Total Error</td>
+				<td>{{ neural_network.totalError }}</td>
+			</tr>
 		</table>
 	</div>
 </div>
