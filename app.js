@@ -101,14 +101,23 @@ async function autoFetch() {
 
 cron.schedule('00 00 00 * * *', () => {
 	autoFetch();
+}, {
+	scheduled: true,
+	timezone: "Asia/Jakarta"
 });
 
 cron.schedule('00 00 12 * * *', () => {
 	autoFetch();
+}, {
+	scheduled: true,
+	timezone: "Asia/Jakarta"
 });
 
 cron.schedule('00 00 20 * * *', () => {
 	autoFetch();
+}, {
+	scheduled: true,
+	timezone: "Asia/Jakarta"
 });
 
 /**
