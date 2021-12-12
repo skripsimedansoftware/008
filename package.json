@@ -28,6 +28,7 @@
 		"morgan": "~1.10.0",
 		"mysql2": "^2.3.3",
 		"neataptic": "^1.4.7",
+		"node-cron": "^3.0.0",
 		"sequelize": "^6.12.0-alpha.1",
 		"socket.io": "^4.4.0"
 	}

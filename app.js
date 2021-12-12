@@ -13,6 +13,7 @@ const hbs = require('hbs');
 const http = require('http').Server(app);
 const fs = require('fs');
 const io = require('socket.io')(http);
+const cron = require('node-cron');
 
 global.r;
 global.CONSTANTS = {
@@ -67,6 +68,47 @@ async.waterfall([
 			}
 		}
 	}
+});
+
+async function autoFetch() {
+	var shopee = new Libraries.shopee;
+	var itemsCategory = await shopee.getItemByCategory(13);
+	var products = await  shopee.getProductItemsByCategory(13, itemsCategory.length, itemsCategory);
+
+	var date = new Date();
+
+	products.forEach(async (item, index) => {
+		var sha1_data = sha1(JSON.stringify({id: item.itemid, discount: item.raw_discount, price: item.price})).toString();
+		var find = await Models.product.findAll({
+			where: {sha1: sha1_data}
+		});
+
+		if (find.length == 0) {
+			Models.product.create({
+				sha1: sha1_data,
+				item_id: item.itemid,
+				shop_id: item.shopid,
+				name: item.name,
+				real_price: (item.price_before_discount/100000),
+				discount: item.raw_discount,
+				price_with_discount: (item.price/100000),
+				image: item.promo_images[0], //https://cf.shopee.co.id/file/<image>_tn
+				date: moment().tz('Asia/Jakarta').format('YYYY-MM-DD')
+			});
+		}
+	});
+}
+
+cron.schedule('00 00 00 * * *', () => {
+	autoFetch();
+});
+
+cron.schedule('00 00 12 * * *', () => {
+	autoFetch();
+});
+
+cron.schedule('00 00 20 * * *', () => {
+	autoFetch();
 });
 
 /**

@@ -12,10 +12,10 @@ class Shopee {
 			this.api.get('/v2/flash_sale/get_all_itemids', {params: { need_personalize: true, sort_soldout: true }}
 			).then(response => {
 				if (response.data !== undefined && response.data.data !== undefined) {
-					var items = response.data.data.item_brief_list.map((item, index) => {
+					var items = response.data.data.item_brief_list.filter((item, index) => {
 						if (item.catid == id && item.recommendation_info !== null) {
 							var info = JSON.parse(item.recommendation_info);
-							if (parseFloat(info.score.toFixed(2)) < 0.1) {
+							if (parseFloat(info.score.toFixed(2)) > 0.3) {
 								return item.itemid;
 							}
 						}
@@ -23,7 +23,11 @@ class Shopee {
 						return false;
 					});
 
-					resolve(items.filter(Number));
+					items = items.map((item, index) => {
+						return item.itemid;
+					});
+
+					resolve(items);
 				}
 			}, reject);
 		});
@@ -44,7 +48,13 @@ class Shopee {
 				sort_soldout: true,
 				need_personalize: true,
 				with_dp_items: true
-			}).then(response => { resolve(response.data.data.items) }, reject);
+			}).then(response => { 
+				if (response.data.data !== null) {
+					resolve(response.data.data.items);
+				} else {
+					resolve([]);
+				}
+			}, reject);
 		});
 	}
 
