@@ -10,6 +10,12 @@ router.get('/', async function(req, res) {
 
 	var shopee = new Libraries.shopee;
 	var itemsCategory = await shopee.getItemByCategory(13);
+
+	if (itemsCategory.length == 0)
+	{
+		itemsCategory = await shopee.getItemByCategory(13, false);
+	}
+
 	var products = await  shopee.getProductItemsByCategory(13, itemsCategory.length, itemsCategory);
 
 	var date = new Date();

@@ -7,21 +7,31 @@ class Shopee {
 		});
 	}
 
-	getItemByCategory(id) {
+	getItemByCategory(id, filter = true) {
 		return new Promise((resolve, reject) => {
 			this.api.get('/v2/flash_sale/get_all_itemids', {params: { need_personalize: true, sort_soldout: true }}
 			).then(response => {
 				if (response.data !== undefined && response.data.data !== undefined) {
-					var items = response.data.data.item_brief_list.map((item, index) => {
-						if (item.catid == id && item.recommendation_info !== null) {
-							var info = JSON.parse(item.recommendation_info);
-							if (parseFloat(info.score.toFixed(2)) < 0.1) {
+					if (filter) {
+						var items = response.data.data.item_brief_list.map((item, index) => {
+							if (item.catid == id && item.recommendation_info !== null) {
+								var info = JSON.parse(item.recommendation_info);
+								if (parseFloat(info.score.toFixed(2)) < 0.1) {
+									return item.itemid;
+								}
+							}
+
+							return false;
+						});
+					} else {
+						var items = response.data.data.item_brief_list.map((item, index) => {
+							if (item.catid == id) {
 								return item.itemid;
 							}
-						}
 
-						return false;
-					});
+							return false;
+						});
+					}
 
 					resolve(items.filter(Number));
 				}
